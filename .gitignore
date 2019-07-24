@@ -117,3 +117,4 @@ dmypy.json
 .idea/modules.xml
 .idea/workspace.xml
 .idea/instagram-uploader.iml
+.DS_Store

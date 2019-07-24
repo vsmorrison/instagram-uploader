@@ -3,12 +3,9 @@ import os
 from PIL import Image
 
 
-def create_directory():
-    try:
-        os.makedirs('images')
-        os.makedirs('thumbnails')
-    except FileExistsError:
-        pass
+def create_directories():
+    os.makedirs('images', exist_ok=True)
+    os.makedirs('thumbnails', exist_ok=True)
 
 
 def get_hubble_images_links():
@@ -23,14 +20,14 @@ def get_hubble_images_links():
     return links
 
 
-def get_file_extension(url):
-    extension = []
+def get_file_extensions(url):
+    extensions = []
     for url in url:
-        extension.append(url.split('.')[-1])
-    return extension
+        extensions.append(url.split('.')[-1])
+    return extensions
 
 
-def save_hubble_image(url, file_extension):
+def save_hubble_images(url, file_extension):
     for url_index, url_value in enumerate(url):
         response = requests.get(url_value, verify=False)
         filepath = 'images/hubble{}.{}'.format(
@@ -41,7 +38,7 @@ def save_hubble_image(url, file_extension):
             file.write(response.content)
 
 
-def resize_image(image):
+def resize_images(image):
     size = image.size
     width, height = size
     horizontal_ratio = 16 / 9
@@ -56,13 +53,13 @@ def resize_image(image):
     return resized_image
 
 
-def save_resized_image():
+def save_resized_images():
     images = os.listdir('images')
     for image in images:
         if image.split('.')[1] != 'pdf':
             filepath = 'images/{}'.format(image)
             new_image = Image.open(filepath)
-            new_image = resize_image(new_image)
+            new_image = resize_images(new_image)
             new_image.save(
                 'thumbnails/{}_thubmnail.{}'.format(
                     image.split('.')[0],
@@ -74,7 +71,7 @@ def save_resized_image():
 
 
 if __name__ == '__main__':
-    create_directory()
+    create_directories()
     url_hubble = get_hubble_images_links()
-    save_hubble_image(url_hubble, get_file_extension(get_hubble_images_links()))
-    save_resized_image()
+    save_hubble_images(url_hubble, get_file_extensions(get_hubble_images_links()))
+    save_resized_images()
