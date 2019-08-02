@@ -1,21 +1,30 @@
 import requests
 import os
+import argparse
 from PIL import Image
 
 
-def create_directories():
-    os.makedirs('images', exist_ok=True)
-    os.makedirs('thumbnails', exist_ok=True)
-
-
-def get_hubble_images_links():
-    image_id = 3962
-    links = []
-    url = 'http://hubblesite.org/api/v3/image/{}'.format(image_id)
+def get_images_id_from_collections(collection):
+    images_id = []
+    url = 'http://hubblesite.org/api/v3/images/{}'.format(collection)
     response = requests.get(url)
-    images = response.json()['image_files']
-    for image_index, image_value in enumerate(images):
-        image_link = 'https:{}'.format(image_value['file_url'])
+    response.raise_for_status()
+    images = response.json()
+    for image in images:
+        image_id = image['id']
+        images_id.append(image_id)
+    return images_id
+
+
+def get_hubble_images_links(images_id):
+    links = []
+    for image_id in images_id:
+        url = 'http://hubblesite.org/api/v3/image/{}'.format(image_id)
+        response = requests.get(url)
+        response.raise_for_status()
+        images = response.json()['image_files']
+        for image in images:
+            image_link = 'https:{}'.format(image['file_url'])
         links.append(image_link)
     return links
 
@@ -30,12 +39,14 @@ def get_file_extensions(url):
 def save_hubble_images(url, file_extension):
     for url_index, url_value in enumerate(url):
         response = requests.get(url_value, verify=False)
+        response.raise_for_status()
         filepath = 'images/hubble{}.{}'.format(
             url_index,
             file_extension[url_index]
         )
         with open(filepath, 'wb') as file:
             file.write(response.content)
+        save_resized_images()
 
 
 def resize_images(image):
@@ -56,22 +67,29 @@ def resize_images(image):
 def save_resized_images():
     images = os.listdir('images')
     for image in images:
-        if image.split('.')[1] != 'pdf':
-            filepath = 'images/{}'.format(image)
-            new_image = Image.open(filepath)
-            new_image = resize_images(new_image)
-            new_image.save(
-                'thumbnails/{}_thubmnail.{}'.format(
-                    image.split('.')[0],
-                    image.split('.')[1]
-                )
+        filepath = 'images/{}'.format(image)
+        new_image = Image.open(filepath)
+        new_image = resize_images(new_image)
+        new_image.save(
+            'thumbnails/{}_thubmnail.{}'.format(
+                image.split('.')[0],
+                image.split('.')[1]
             )
-        else:
-            continue
+        )
 
 
 if __name__ == '__main__':
-    create_directories()
-    url_hubble = get_hubble_images_links()
-    save_hubble_images(url_hubble, get_file_extensions(get_hubble_images_links()))
-    save_resized_images()
+    os.makedirs('images', exist_ok=True)
+    os.makedirs('thumbnails', exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('collection', help='Коллекция фотографий')
+    args = parser.parse_args()
+    try:
+        images_id = get_images_id_from_collections(args.collection)
+        url_hubble = get_hubble_images_links(images_id)
+        save_hubble_images(
+            url_hubble,
+            get_file_extensions(get_hubble_images_links(images_id))
+        )
+    except requests.HTTPError as error:
+        exit('An error occured: {}'.format(error))

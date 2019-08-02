@@ -39,8 +39,11 @@ python fetch_spacex.py
 Для запуска скачивания и сохранения фотографий Hubble необходимо в командной 
 строке выполнить команду:
 ```
-python fetch_hubble.py
+python fetch_hubble.py collection_name
 ```
+collection_name - название коллекции фотографий. Примеры существующих коллекций
+Hubble: holiday_cards, wallpaper, spacecraft, news, printshop, stsci_gallery, 
+hubble_non_news_assets и другие. 
 Фотографии после выполнения скриптов сохраняются в папку images, копии с 
 соблюдением пропорций ширины и высоты для Instagram сохраняются в папку 
 thumbnails (перед публикацией необходимо редактировать именно эту папку, если
