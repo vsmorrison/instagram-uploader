@@ -7,9 +7,9 @@ def upload_image_to_instagram():
     bot = Bot()
     bot.login(username=LOGIN, password=PASSWORD)
     images = os.listdir('thumbnails')
-    for image_index, image_value in enumerate(images):
+    for image_index, filename in enumerate(images):
         bot.upload_photo(
-            "thumbnails/{}".format(image_value),
+            "thumbnails/{}".format(filename),
             caption="Space Picture - {}\n".format(image_index)
         )
 
