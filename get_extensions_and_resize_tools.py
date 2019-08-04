@@ -7,8 +7,8 @@ def get_files_extensions(urls):
     return extensions
 
 
-def resize_images(images):
-    size = images.size
+def resize_image(image):
+    size = image.size
     width, height = size
     horizontal_ratio = 16 / 9
     vertical_ratio = 0.8
@@ -18,7 +18,7 @@ def resize_images(images):
         size = (width, int(width / horizontal_ratio))
     elif width < height:
         size = (int(height * vertical_ratio), height)
-    resized_image = images.resize(size)
+    resized_image = image.resize(size)
     return resized_image
 
 
@@ -27,7 +27,7 @@ def save_resized_images():
     for image in images:
         filepath = 'images/{}'.format(image)
         new_image = Image.open(filepath)
-        new_image = resize_images(new_image)
+        new_image = resize_image(new_image)
         new_image.save(
             'thumbnails/{}_thubmnail.{}'.format(
                 image.split('.')[0],
